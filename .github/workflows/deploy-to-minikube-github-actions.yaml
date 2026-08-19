@@ -16,12 +16,14 @@ jobs:
         run: |
           export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
-          docker build -f ./Dockerfile -t devops-hint/node-app .
+          docker build -f ./Dockerfile -t devops-hint/node-app:latest .
           echo -n "verifying images:"
           docker images
       - name: Deploy to minikube
-        run:
+        run: |
           kubectl apply -f k8s-node-app.yaml
+          kubectl rollout status deployment/nodejs-app --timeout=90s
+          kubectl get pods -l app=nodejs-app
       - name: Test service URLs
         run: |
           minikube service list
